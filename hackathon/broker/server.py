@@ -211,12 +211,21 @@ async def list_tools():
     tools = []
     for name, server in registry.servers.items():
         for tool in server.tools:
-            tools.append({
-                "name": tool["name"],
-                "server": name,
-                "description": tool.get("description", ""),
-                "parameters": tool.get("parameters", {}),
-            })
+            # Handle both string names and full tool dicts
+            if isinstance(tool, str):
+                tools.append({
+                    "name": tool,
+                    "server": name,
+                    "description": f"Tool from {name} server",
+                    "parameters": {},
+                })
+            else:
+                tools.append({
+                    "name": tool.get("name", ""),
+                    "server": name,
+                    "description": tool.get("description", ""),
+                    "parameters": tool.get("parameters", {}),
+                })
 
     return {"tools": tools, "total": len(tools)}
 

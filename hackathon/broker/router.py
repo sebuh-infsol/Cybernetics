@@ -92,7 +92,8 @@ class Router:
             if not server.enabled:
                 continue
             for tool in server.tools:
-                if tool["name"] == method:
+                tool_name = tool if isinstance(tool, str) else tool.get("name", "")
+                if tool_name == method:
                     return server
 
         # Default to first enabled server

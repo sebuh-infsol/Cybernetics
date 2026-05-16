@@ -1,0 +1,3 @@
+{"timestamp": 1778968337.9780562, "type": "audit", "event": "request", "method": "gitlab_get_project", "params": {"project_id": "1"}}
+{"timestamp": 1778968665.5929685, "type": "audit", "event": "request", "method": "gitlab_get_project", "params": {"project_id": "1"}}
+{"timestamp": 1778968665.5930915, "type": "audit", "event": "response", "method": "gitlab_get_project", "latency_ms": 0.12, "result": {"server": "gitlab", "method": "gitlab_get_project", "params": {"project_id": "1"}, "response": "Response from gitlab for gitlab_get_project", "timestamp": 1778968665.5930896}}

@@ -49,7 +49,7 @@
     }
   },
   "google_cloud": {
-    "project_id": "${GOOGLE_CLOUD_PROJECT_ID}",
+    "project_id": "strawberry-fields-496517",
     "region": "us-central1",
     "agent_builder_url": "https://agentbuilder.cloud.google.com"
   }
