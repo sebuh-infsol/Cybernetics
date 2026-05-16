@@ -1,0 +1,56 @@
+{
+  "agent": {
+    "name": "Cybernetics Omni-MCP Broker",
+    "description": "Composable MCP broker for Google Cloud Rapid Agent Hackathon — enables Gemini 3 agents to dynamically connect to multiple partner MCP servers with governance layering.",
+    "model": "gemini-2.5-pro-xp",
+    "version": "0.1.0-hackathon"
+  },
+  "mcp": {
+    "transport": "sse",
+    "endpoint": "http://localhost:8000/mcp/sse",
+    "protocol_version": "2025-03-26"
+  },
+  "tools": [
+    {
+      "name": "gitlab_get_project",
+      "server": "gitlab",
+      "description": "Get project details from GitLab"
+    },
+    {
+      "name": "gitlab_create_issue",
+      "server": "gitlab",
+      "description": "Create a new issue in GitLab"
+    },
+    {
+      "name": "gitlab_merge_request",
+      "server": "gitlab",
+      "description": "Create a merge request in GitLab"
+    },
+    {
+      "name": "gitlab_get_merge_request",
+      "server": "gitlab",
+      "description": "Get merge request details from GitLab"
+    }
+  ],
+  "sentinels": {
+    "auditor": {
+      "enabled": true,
+      "log_path": "logs/audit.jsonl"
+    },
+    "safety": {
+      "enabled": true,
+      "max_tool_calls": 10,
+      "blocklist": ["system_command", "file_write", "network_request"]
+    },
+    "cost": {
+      "enabled": true,
+      "budget_limit": 5.00,
+      "currency": "USD"
+    }
+  },
+  "google_cloud": {
+    "project_id": "${GOOGLE_CLOUD_PROJECT_ID}",
+    "region": "us-central1",
+    "agent_builder_url": "https://agentbuilder.cloud.google.com"
+  }
+}
