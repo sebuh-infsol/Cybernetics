@@ -103,6 +103,27 @@ hackathon/
 3. Test GitLab integration: `curl -X POST http://localhost:8000/mcp -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","method":"gitlab_get_project","params":{"project_id":"1"},"id":1}'`
 4. Check audit log: `cat logs/audit.jsonl`
 
+### Full Demo
+
+Run the automated demo that walks through the complete flow:
+
+```bash
+python3 demo.py
+```
+
+The demo covers:
+1. Broker health check
+2. Available tools listing
+3. Registered partner servers
+4. End-to-end GitLab issue creation via the broker
+5. Multi-track routing architecture overview
+
+## Google Cloud
+
+- **Project ID:** `strawberry-fields-496517`
+- **Region:** `us-central1`
+- **Agent Builder:** https://agentbuilder.cloud.google.com
+
 ## License
 
 MIT
