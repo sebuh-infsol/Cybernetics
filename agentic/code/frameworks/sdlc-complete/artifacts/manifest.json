@@ -1,0 +1,12 @@
+{
+  "name": "artifacts",
+  "path": "agentic/code/frameworks/sdlc-complete/artifacts",
+  "files": [
+    "README.md",
+    "manifest.json",
+    "manifest.md"
+  ],
+  "ignore": [
+    "manifest.json"
+  ]
+}

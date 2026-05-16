@@ -1,0 +1,12 @@
+{
+  "name": "traceability",
+  "path": "agentic/code/frameworks/sdlc-complete/artifacts/sample-project/traceability",
+  "files": [
+    "manifest.json",
+    "manifest.md",
+    "traceability-matrix.csv"
+  ],
+  "ignore": [
+    "manifest.json"
+  ]
+}
