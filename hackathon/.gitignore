@@ -1,0 +1,13 @@
+# Video build artifacts
+build-video*.py
+create-video*.sh
+create-demo-video*.sh
+cast-to-video.py
+demo.mp4
+demo-session.cast
+demo-record.sh
+create-demo-video-instructions.md
+
+# Python cache
+__pycache__/
+*.pyc

@@ -26,8 +26,8 @@
        ┌───────────────┼───────────────┬───────────────┐
        ▼               ▼               ▼               ▼
   ┌─────────┐    ┌──────────┐   ┌──────────┐   ┌──────────┐
-  │ GitLab  │    │ MongoDB  │   │ Elastic  │   │ Arize    │
-  │  MCP    │    │  MCP     │   │  MCP     │   │  MCP     │
+  │ GitLab  │    │ GitHub   │   │ MongoDB  │   │ Elastic  │
+  │  MCP    │    │ Adapter  │   │  MCP     │   │  MCP     │
   └─────────┘    └──────────┘   └──────────┘   └──────────┘
 ```
 
@@ -58,6 +58,7 @@ python -m broker.server
 | Track | MCP Server | Status |
 |-------|-----------|--------|
 | **GitLab** | GitLab MCP Server | ✅ Primary |
+| **GitHub** | GitHub REST API Adapter | ✅ Primary |
 | MongoDB | MongoDB MCP Server | 🔄 Pluggable |
 | Elastic | Elastic MCP Server | 🔄 Pluggable |
 | Arize | Arize MCP Server | 🔄 Pluggable |
@@ -68,7 +69,7 @@ python -m broker.server
 
 - ✅ Built using **Gemini 3** (Agent Builder SSE endpoint)
 - ✅ Uses **Google Cloud Agent Builder**
-- ✅ Integrates **partner MCP servers** (GitLab primary, others pluggable)
+- ✅ Integrates **partner MCP servers** (GitLab primary, GitHub adapter, others pluggable)
 - ✅ Multi-track composable architecture
 - ✅ Governance/sentinel layer for tool call auditing
 
@@ -88,6 +89,7 @@ hackathon/
 │   └── cost.py          # Cost estimator
 ├── adapters/            # Partner MCP adapters
 │   ├── gitlab.py        # GitLab MCP adapter
+│   ├── github_adapter.py # GitHub REST API adapter
 │   └── base.py          # Base adapter class
 ├── google-cloud/        # Google Cloud Agent Builder config
 │   └── agent-config.json
@@ -101,7 +103,8 @@ hackathon/
 1. Start the broker: `python -m broker.server`
 2. Query tools: `curl http://localhost:8000/tools`
 3. Test GitLab integration: `curl -X POST http://localhost:8000/mcp -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","method":"gitlab_get_project","params":{"project_id":"1"},"id":1}'`
-4. Check audit log: `cat logs/audit.jsonl`
+4. Test GitHub integration: `curl -X POST http://localhost:8000/mcp -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","method":"github_get_repo","params":{"owner":"strawberr0","repo":"Cybernetics"},"id":2}'`
+5. Check audit log: `cat logs/audit.jsonl`
 
 ### Full Demo
 
@@ -116,7 +119,8 @@ The demo covers:
 2. Available tools listing
 3. Registered partner servers
 4. End-to-end GitLab issue creation via the broker
-5. Multi-track routing architecture overview
+5. GitHub repository query via the broker
+6. Multi-track routing architecture overview
 
 ## Google Cloud
 

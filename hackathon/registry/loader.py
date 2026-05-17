@@ -26,17 +26,20 @@ class PartnerServer:
     tools: list = field(default_factory=list)
     last_health_check: float = 0.0
     health_status: str = "unknown"
+    adapter: Any = None
 
     async def forward(self, request: dict) -> dict:
-        """Forward a request to this partner's MCP server."""
-        # In production, this would make an HTTP call to the partner's MCP endpoint
-        # For the hackathon demo, we simulate the response
+        """Forward a request to this partner's MCP server or local adapter."""
         method = request.get("method", "")
         params = request.get("params", {})
 
         logger.info(f"Forwarding {method} to {self.name}")
 
-        # Simulate MCP server response
+        # If we have a local adapter, use it
+        if self.adapter and hasattr(self.adapter, "resolve"):
+            return self.adapter.resolve(method, params)
+
+        # Otherwise simulate MCP server response (for remote SSE servers)
         return {
             "server": self.name,
             "method": method,
@@ -73,11 +76,30 @@ class RegistryLoader:
 
         for name, config in partners.items():
             if config.get("enabled", False):
+                # Load local adapter if specified
+                adapter = None
+                adapter_name = config.get("adapter")
+                if adapter_name:
+                    try:
+                        adapter_module = __import__(
+                            f"broker.adapters.{adapter_name}",
+                            fromlist=[adapter_name]
+                        )
+                        adapter_class = getattr(adapter_module, adapter_name.replace("-", "_").title().replace("_", ""))
+                        # Handle adapter class naming (e.g., github_adapter → GitHubAdapter)
+                        class_name = "".join(word.title() for word in adapter_name.split("-")) + "Adapter"
+                        adapter_class = getattr(adapter_module, class_name)
+                        adapter = adapter_class()
+                        logger.info(f"Loaded adapter: {adapter_name}")
+                    except Exception as e:
+                        logger.warning(f"Failed to load adapter {adapter_name}: {e}")
+
                 server = PartnerServer(
                     name=name,
                     config=config,
                     enabled=True,
                     tools=config.get("tools", []),
+                    adapter=adapter,
                 )
                 self.servers[name] = server
                 self.total_tools += len(server.tools)

@@ -28,6 +28,20 @@ partners:
       - safety
       - cost
 
+  github:
+    name: "GitHub"
+    enabled: true
+    adapter: "github_adapter"
+    tools:
+      - "github_get_repo"
+      - "github_create_issue"
+      - "github_create_pr"
+      - "github_list_prs"
+    sentinels:
+      - auditor
+      - safety
+      - cost
+
   mongodb:
     name: "MongoDB"
     enabled: false
@@ -132,6 +146,10 @@ sentinels:
       gitlab_get_project: 0.001
       gitlab_create_issue: 0.002
       gitlab_merge_request: 0.003
+      github_get_repo: 0.001
+      github_create_issue: 0.002
+      github_create_pr: 0.003
+      github_list_prs: 0.001
       mongodb_find: 0.001
       mongodb_insert: 0.002
       elastic_search: 0.001
