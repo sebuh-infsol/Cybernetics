@@ -1,0 +1,13 @@
+{
+  "name": "Installer",
+  "path": "tools/install",
+  "files": [
+    "README.md",
+    "install.sh",
+    "manifest.md",
+    "new-project.mjs"
+  ],
+  "ignore": [
+    "manifest.json"
+  ]
+}

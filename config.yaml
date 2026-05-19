@@ -1,0 +1,51 @@
+# Omni-MCP Broker Configuration
+servers:
+  gitlab:
+    name: "GitLab"
+    url: "https://mcp.gitlab.com/sse" # Placeholder URL
+    auth:
+      type: "token"
+      key: "${GITLAB_TOKEN}"
+  
+  mongodb:
+    name: "MongoDB"
+    url: "https://mcp.mongodb.com/sse" # Placeholder URL
+    auth:
+      type: "connection_string"
+      key: "${MONGODB_URI}"
+
+  elastic:
+    name: "Elastic"
+    url: "https://mcp.elastic.co/sse" # Placeholder URL
+    auth:
+      type: "api_key"
+      key: "${ELASTIC_API_KEY}"
+
+  arize:
+    name: "Arize"
+    url: "https://mcp.arize.com/sse" # Placeholder URL
+    auth:
+      type: "api_key"
+      key: "${ARIZE_API_KEY}"
+
+  fivetran:
+    name: "Fivetran"
+    url: "https://mcp.fivetran.com/sse" # Placeholder URL
+    auth:
+      type: "api_key"
+      key: "${FIVETRAN_API_KEY}"
+
+  dynatrace:
+    name: "Dynatrace"
+    url: "https://mcp.dynatrace.com/sse" # Placeholder URL
+    auth:
+      type: "token"
+      key: "${DYNATRACE_TOKEN}"
+
+sentinels:
+  - name: "Auditor"
+    enabled: true
+  - name: "SafetyGuard"
+    enabled: false
+  - name: "CostEstimator"
+    enabled: false
