@@ -1,8 +1,36 @@
-# Cybernetics Composable Meta-MCP for Google Cloud Agents
+<div align="center">
+
+![Cybernetics Banner](assets/banner.svg)
+
+</div>
+
+<p align="center">
+  <strong>Composable Meta-MCP for Google Cloud Agents</strong><br/>
+  <sub>v0.1.1  •  20 Adapters  •  80+ Tools  •  Agent Composer  •  A2A/ERC-8004 Ready</sub>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/status-production--ready-emerald?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PGNpcmNsZSBjeD0iOCIgY3k9IjgiIHI9IjgiIGZpbGw9IiMxMGI5ODEiLz48L3N2Zz4=" alt="Status"/>
+  <img src="https://img.shields.io/badge/Go-1.22-blue?style=flat-square&logo=go&logoColor=white" alt="Go"/>
+  <img src="https://img.shields.io/badge/Python-3.11-blue?style=flat-square&logo=python&logoColor=white" alt="Python"/>
+  <img src="https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react&logoColor=white" alt="React"/>
+  <img src="https://img.shields.io/badge/TypeScript-strict-blue?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript"/>
+  <img src="https://img.shields.io/badge/license-Apache%202.0-slate?style=flat-square" alt="License"/>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/MCP-2024--11--05-green?style=flat-square" alt="MCP"/>
+  <img src="https://img.shields.io/badge/A2A-compatible-green?style=flat-square" alt="A2A"/>
+  <img src="https://img.shields.io/badge/ERC--8004-compatible-green?style=flat-square" alt="ERC-8004"/>
+  <img src="https://img.shields.io/badge/Google%20Cloud-Run-orange?style=flat-square&logo=google-cloud&logoColor=white" alt="Google Cloud"/>
+  <img src="https://img.shields.io/badge/Gemini-3.x-orange?style=flat-square&logo=google&logoColor=white" alt="Gemini"/>
+</p>
+
+---
 
 **Classification:** UNCLASSIFIED / OPEN SOURCE  
 **Authors:** plasmaraygun, GoryGrey, royhodge812, sebuh-infsol  (strawberr0)  
-**Version:** 2026.5.2  
+**Version:** 0.1.1  
 **Status:** Production-Ready  
 
 ---
@@ -86,13 +114,96 @@ Cybernetics is a **composable Model Context Protocol (MCP) meta-broker** designe
 
 ---
 
-## 4. MCP Server — Cybernetics as an MCP Peer
+## 4. Cybernetics MCP Server — Usage Guide
 
-Cybernetics is not just a broker; it is a **first-class MCP server** that any MCP client (Claude Desktop, Cursor, Windsurf, etc.) can connect to via stdio transport.
+Cybernetics is a **first-class MCP server** that exposes its adapters and agent templates as tools over the Model Context Protocol. Any MCP client (Claude Desktop, Cursor, Windsurf, etc.) can connect to it.
 
-### 4.1 Connecting from Claude Desktop
+### 4.1 What Is the Cybernetics MCP Server?
 
-Add to your `claude_desktop_config.json`:
+The Cybernetics MCP server is a single stdio-based MCP peer that aggregates all configured adapters into one unified tool namespace. Instead of installing 20 separate MCP servers, you install **one**:
+
+```json
+{
+  "mcpServers": {
+    "cybernetics": {
+      "command": "python",
+      "args": ["-m", "cybernetics.mcp"],
+      "env": {
+        "BROKER_API_KEY": "your-broker-key",
+        "POSTGRES_DSN": "postgresql+asyncpg://user:pass@localhost/sentinel"
+      }
+    }
+  }
+}
+```
+
+Once connected, your MCP client sees **all tools** from **all enabled adapters** as a flat list:
+
+| Tool | What it does |
+|---|---|
+| `dynatrace_get_problems` | Fetch active problems from Dynatrace |
+| `github_create_issue` | Create a GitHub issue |
+| `slack_post_message` | Post to a Slack channel |
+| `browser_screenshot` | Take a browser screenshot via CDP |
+| `sentinel_run` | Execute the full Sentinel agent workflow |
+| `deploy_trigger_pipeline` | Trigger a GitLab CI/CD pipeline |
+
+### 4.2 How It Works
+
+```
+┌─────────────┐      stdio       ┌──────────────────────────────────────────┐
+│   Claude    │ ◄──────────────► │  Cybernetics MCP Server                  │
+│   Desktop   │   JSON-RPC 2.0   │  ┌─────────────┐  ┌──────────────────┐  │
+└─────────────┘                  │  │  Registry   │  │  Dynatrace       │  │
+                                 │  │  (loads    │──►│  GitHub          │  │
+                                 │  │  adapters) │  │  Slack           │  │
+                                 │  └─────────────┘  │  Browser...      │  │
+                                 │                   └──────────────────┘  │
+                                 └───────────────────────────────────────────┘
+```
+
+**You do not configure each adapter individually.** Adapters are loaded from the Cybernetics broker's registry based on the environment variables already set on the host.
+
+### 4.3 Required Environment (Preset by Ops)
+
+These are **connection settings** that your platform team configures once:
+
+| Variable | Purpose | Example |
+|---|---|---|
+| `POSTGRES_DSN` | Database connection | `postgresql+asyncpg://...` |
+| `DYNATRACE_BASE_URL` | Dynatrace tenant URL | `https://xyz.live.dynatrace.com` |
+| `ELASTIC_CLOUD_ID` | Elastic Cloud deployment ID | `my-deployment:ZXUta2...` |
+| `GITLAB_URL` | GitLab instance | `https://gitlab.com` |
+| `ARIZE_ENDPOINT` | Arize Phoenix URL | `https://app.phoenix.arize.com` |
+| `DATADOG_SITE` | Datadog region | `datadoghq.com` |
+| `BROWSER_CDP_HOST` | Browser CDP host | `localhost` |
+| `BROWSER_CDP_PORT` | Browser CDP port | `9222` |
+
+### 4.4 Secret Keys (Injected per User / Team)
+
+These are the **only** values users typically need to provide:
+
+| Variable | Adapter | Where to get it |
+|---|---|---|
+| `BROKER_API_KEY` | Cybernetics | Your admin issues this |
+| `DYNATRACE_API_TOKEN` | Dynatrace | Settings → Access tokens |
+| `ELASTIC_API_KEY` | Elastic | Stack Management → API Keys |
+| `GITLAB_TOKEN` | GitLab | User Settings → Access Tokens |
+| `GITHUB_TOKEN` | GitHub | Settings → Developer settings → PAT |
+| `SLACK_BOT_TOKEN` | Slack | api.slack.com/apps → OAuth & Permissions |
+| `DATADOG_API_KEY` / `APP_KEY` | Datadog | Organization Settings → API Keys |
+| `NOTION_TOKEN` | Notion | notion.so/my-integrations |
+| `LINEAR_API_KEY` | Linear | Settings → API |
+
+### 4.5 Example: Using Cybernetics from Claude Desktop
+
+**Step 1:** Install the Cybernetics MCP package:
+
+```bash
+pip install cybernetics-mcp
+```
+
+**Step 2:** Add to `claude_desktop_config.json`:
 
 ```json
 {
@@ -101,15 +212,46 @@ Add to your `claude_desktop_config.json`:
       "command": "cybernetics-mcp",
       "env": {
         "BROKER_API_KEY": "your-key",
-        "POSTGRES_DSN": "postgresql+asyncpg://...",
-        "DYNATRACE_API_TOKEN": "..."
+        "POSTGRES_DSN": "postgresql+asyncpg://user:pass@localhost/sentinel",
+        "DYNATRACE_BASE_URL": "https://xyz.live.dynatrace.com",
+        "DYNATRACE_API_TOKEN": "dt0c01.xxx"
       }
     }
   }
 }
 ```
 
-### 4.2 Protocol
+**Step 3:** Ask Claude to use it:
+
+> "Check Dynatrace for active problems on the api service, then post a summary to Slack #incidents"
+
+Claude will:
+1. Call `tools/list` and see `dynatrace_get_problems` + `slack_post_message`
+2. Call `dynatrace_get_problems` with `{ "service": "api" }`
+3. Call `slack_post_message` with the results
+
+### 4.6 Example: Using Cybernetics from Cursor
+
+Cursor supports MCP servers via `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "cybernetics": {
+      "command": "cybernetics-mcp",
+      "env": { "BROKER_API_KEY": "...", "POSTGRES_DSN": "..." }
+    }
+  }
+}
+```
+
+In Cursor's chat, type `@cybernetics` and ask:
+
+> "Run the sentinel agent to check for production issues"
+
+Cursor will invoke `sentinel_run` and stream the multi-phase results.
+
+### 4.7 Protocol Details
 
 Implements MCP protocol `2024-11-05` over stdio (JSON-RPC 2.0):
 
@@ -369,7 +511,109 @@ for event in runner.run("Deploy my-app to production"):
 
 ---
 
-## 11. License & Attribution
+## 11. Agent Composer
+
+A React + TypeScript web UI and Go backend for composing and deploying custom agents.
+
+```bash
+# Start the composer backend
+go run cmd/composer/main.go
+
+# Start the frontend
+cd frontend && npm install && npm run dev
+```
+
+**Workflow:**
+1. **Pick Template** — Choose from 10 agent templates (Sentinel, Deploy, Finance, Infra, Security, Data, Ops, Content, Commerce, Analytics)
+2. **Select Adapters** — Toggle any of the 20 MCP adapters
+3. **Configure Keys** — Enter API keys for selected adapters
+4. **Compose** — Gemini generates a custom Python agent class
+5. **Deploy** — One-click deploy to Google Cloud Run
+
+**API Endpoints:**
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/templates` | GET | List all 10 templates + 20 adapters |
+| `/api/compose` | POST | Generate agent code via Gemini |
+| `/api/deploy` | POST | Return Cloud Run deployment command |
+
+**Example compose request:**
+
+```bash
+curl -X POST http://localhost:3001/api/compose \
+  -H "Content-Type: application/json" \
+  -d '{
+    "template": "sentinel",
+    "adapters": ["dynatrace", "slack", "datadog"],
+    "env_vars": {"DYNATRACE_API_TOKEN": "xxx", "SLACK_BOT_TOKEN": "xoxb-xxx"},
+    "prompt": "Add a custom phase that posts a daily digest to Slack"
+  }'
+```
+
+---
+
+## 12. Google ADK A2A, A2P & ERC-8004 Integration
+
+Cybernetics agents implement Google's **Agent-to-Agent (A2A)** and **Agent-to-Protocol (A2P)** patterns for cross-agent interoperability.
+
+### 12.1 A2A — Agent-to-Agent
+
+Agents register capabilities in a shared `A2ARegistry`. Other agents can discover and invoke those capabilities dynamically.
+
+```python
+from cybernetics.a2a.hooks import A2ACapability, get_a2a_registry
+
+cap = A2ACapability(
+    id="sentinel_detect",
+    name="Sentinel Problem Detection",
+    description="Fetch active Dynatrace problems for a service",
+    input_schema={"service": {"type": "string"}},
+    output_schema={"problems": {"type": "array"}},
+)
+get_a2a_registry().register_capability(cap)
+```
+
+### 12.2 A2P — Agent-to-Protocol
+
+Agents can subscribe to or emit protocol events for decoupled coordination.
+
+```python
+from cybernetics.a2a.hooks import A2PProtocol, get_a2a_registry
+
+proto = A2PProtocol(
+    id="incident_v1",
+    name="Incident Stream",
+    version="1.0",
+    schema_uri="https://cybernetics.dev/schemas/incident.json",
+    event_types=["detected", "resolved", "escalated"],
+)
+get_a2a_registry().register_protocol(proto)
+```
+
+### 12.3 ERC-8004 (8004.org)
+
+**ERC-8004** is an Ethereum standard for agent capability discovery and identity, authored by Google. Cybernetics implements the on-chain resolution contract via `ERC8004Resolver`.
+
+```python
+from cybernetics.a2a.hooks import get_erc8004_resolver
+
+resolver = get_erc8004_resolver()
+
+# Query which capabilities are available
+resolver.resolve(["sentinel_detect", "deploy_trigger"])
+# → {"sentinel_detect": {"available": true, ...}, ...}
+
+# Negotiate intersecting capabilities with a remote agent
+resolver.negotiate([{"id": "sentinel_detect"}, {"id": "unknown_cap"}])
+# → ["sentinel_detect"]
+```
+
+**Reference:** [8004.org](https://8004.org)
+
+---
+
+## 13. License & Attribution
 
 Licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0+).
 See `LICENSE` for the full text.
