@@ -22,6 +22,8 @@ def test_dynatrace_client_init():
 
 def test_mongodb_client_init():
     """MongoDB client can be initialized."""
+    if not Config.MONGODB_URI:
+        pytest.skip("Missing required env var: MONGODB_URI")
     from src.tools.mongodb_tools import MongoDBClient
     client = MongoDBClient()
     assert client.db is not None
