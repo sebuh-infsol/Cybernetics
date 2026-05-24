@@ -1,7 +1,7 @@
 <div align="center">
 
 ![Cybernetics Banner](assets/banner.svg)
-[![pages-build-deployment](https://github.com/strawberr0/Cybernetics/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/strawberr0/Cybernetics/actions/workflows/pages/pages-build-deployment)
+
 </div>
 
 <p align="center">
@@ -613,7 +613,67 @@ resolver.negotiate([{"id": "sentinel_detect"}, {"id": "unknown_cap"}])
 
 ---
 
-## 13. License & Attribution
+## 14. Extending Cybernetics
+
+Cybernetics is designed to be easily extensible. To add a new MCP adapter, follow these steps:
+
+### 1. Create the Adapter Class
+Create a new file in `cybernetics/adapters/` (e.g., `my_service.py`). Inherit from `MCPAdapter` and implement the required methods:
+
+```python
+from typing import Dict, Any
+from cybernetics.adapters.base import MCPAdapter
+from cybernetics.config.settings import settings
+
+class MyServiceAdapter(MCPAdapter):
+    name = "myservice"
+    description = "Integration with MyService API"
+
+    def __init__(self):
+        super().__init__()
+        self._api_key = settings.myservice_api_key
+        # Initialize your client (e.g., httpx.AsyncClient)
+        self._setup_tools()
+
+    def _setup_tools(self):
+        self.register_tool(
+            "myservice_get_data",
+            "Fetch data from MyService",
+            {"id": {"type": "string"}},
+            ["id"],
+            self._get_data,
+        )
+
+    async def _get_data(self, id: str):
+        # Implementation logic
+        return {"id": id, "data": "..."}
+
+    async def health(self) -> Dict[str, Any]:
+        return {"status": "healthy"}
+```
+
+### 2. Add Configuration
+Add any required environment variables to `cybernetics/config/settings.py` using Pydantic `Field` with an `alias`:
+
+```python
+    # MyService
+    myservice_api_key: str = Field("", alias="MYSERVICE_API_KEY")
+```
+
+### 3. Register the Adapter
+In `cybernetics/broker/server.py`, import your adapter and register it with the global `register_adapter` function:
+
+```python
+from cybernetics.adapters.my_service import MyServiceAdapter
+register_adapter("myservice", MyServiceAdapter)
+```
+
+### 4. Verify
+Run the integration tests and ensure your new adapter is listed in `/mcp/tools`.
+
+---
+
+## 15. License & Attribution
 
 Licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0+).
 See `LICENSE` for the full text.

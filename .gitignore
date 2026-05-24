@@ -33,6 +33,10 @@ env/
 *.swo
 *~
 
+# Dependencies
+node_modules/
+.venv/
+
 # Environment
 .env
 .env.local

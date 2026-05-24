@@ -1,9 +1,8 @@
 """Linear adapter for issue tracking and project management."""
-
-import os
-from typing import Dict, Any
 import httpx
+from typing import Dict, Any, List
 from cybernetics.adapters.base import MCPAdapter
+from cybernetics.config.settings import settings
 from cybernetics.logging.logger import get_logger
 
 logger = get_logger("cybernetics.adapters.linear")
@@ -11,19 +10,21 @@ logger = get_logger("cybernetics.adapters.linear")
 
 class LinearAdapter(MCPAdapter):
     name = "linear"
-    description = "Linear project management — issues, teams, cycles"
+    description = "Linear project management integration"
 
     def __init__(self):
         super().__init__()
-        self._token = os.getenv("LINEAR_API_KEY", "")
+        self._token = settings.linear_api_key
         self._client = httpx.AsyncClient(
             base_url="https://api.linear.app",
-            headers={"Authorization": self._token, "Content-Type": "application/json"},
+            headers={
+                "Authorization": self._token,
+                "Content-Type": "application/json",
+            },
             timeout=httpx.Timeout(30.0),
         )
         self._setup_tools()
 
-    def _setup_tools(self):
         self.register_tool(
             "linear_create_issue",
             "Create a Linear issue",

@@ -1,9 +1,9 @@
 """Notion adapter for pages, databases, and workspace operations."""
 
-import os
-from typing import Dict, Any
 import httpx
+from typing import Dict, Any
 from cybernetics.adapters.base import MCPAdapter
+from cybernetics.config.settings import settings
 from cybernetics.logging.logger import get_logger
 
 logger = get_logger("cybernetics.adapters.notion")
@@ -11,11 +11,11 @@ logger = get_logger("cybernetics.adapters.notion")
 
 class NotionAdapter(MCPAdapter):
     name = "notion"
-    description = "Notion workspace integration — pages, databases, blocks"
+    description = "Notion workspace integration via official API"
 
     def __init__(self):
         super().__init__()
-        self._token = os.getenv("NOTION_TOKEN", "")
+        self._token = settings.notion_token
         self._client = httpx.AsyncClient(
             base_url="https://api.notion.com/v1",
             headers={
@@ -26,6 +26,7 @@ class NotionAdapter(MCPAdapter):
             timeout=httpx.Timeout(30.0),
         )
         self._setup_tools()
+
 
     def _setup_tools(self):
         self.register_tool(

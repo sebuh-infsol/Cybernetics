@@ -1,9 +1,9 @@
 """Datadog adapter for metrics, monitors, incidents, and logs."""
 
-import os
-from typing import Dict, Any
 import httpx
+from typing import Dict, Any
 from cybernetics.adapters.base import MCPAdapter
+from cybernetics.config.settings import settings
 from cybernetics.logging.logger import get_logger
 
 logger = get_logger("cybernetics.adapters.datadog")
@@ -15,9 +15,9 @@ class DatadogAdapter(MCPAdapter):
 
     def __init__(self):
         super().__init__()
-        self._api_key = os.getenv("DATADOG_API_KEY", "")
-        self._app_key = os.getenv("DATADOG_APP_KEY", "")
-        self._site = os.getenv("DATADOG_SITE", "datadoghq.com")
+        self._api_key = settings.datadog_api_key
+        self._app_key = settings.datadog_app_key
+        self._site = settings.datadog_site
         self._client = httpx.AsyncClient(
             base_url=f"https://api.{self._site}",
             headers={
@@ -98,7 +98,10 @@ class DatadogAdapter(MCPAdapter):
             self._post_event,
         )
 
-    async def _query_metrics(self, query: str, from_: str, to: str = "now"):
+    async def _query_metrics(self, **kwargs):
+        query = kwargs.get("query")
+        from_ = kwargs.get("from")
+        to = kwargs.get("to", "now")
         r = await self._client.get("/api/v1/query", params={"query": query, "from": from_, "to": to})
         data = r.json()
         return {"series": data.get("series", []), "resolution": data.get("res_type", "")}
@@ -127,7 +130,11 @@ class DatadogAdapter(MCPAdapter):
         data = r.json()
         return {"incidents": [{"id": i["id"], "title": i["attributes"]["title"], "status": i["attributes"]["state"]} for i in data.get("data", [])]}
 
-    async def _search_logs(self, query: str, from_: str, to: str = "now", limit: int = 100):
+    async def _search_logs(self, **kwargs):
+        query = kwargs.get("query")
+        from_ = kwargs.get("from")
+        to = kwargs.get("to", "now")
+        limit = kwargs.get("limit", 100)
         body = {
             "filter": {"query": query, "from": from_, "to": to},
             "page": {"limit": limit},
