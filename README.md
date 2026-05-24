@@ -1,7 +1,7 @@
 <div align="center">
 
 ![Cybernetics Banner](assets/banner.svg)
-
+[![pages-build-deployment](https://github.com/strawberr0/Cybernetics/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/strawberr0/Cybernetics/actions/workflows/pages/pages-build-deployment)
 </div>
 
 <p align="center">
