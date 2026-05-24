@@ -30,6 +30,82 @@
   
 **Version:** 0.1.1  
 
+Project Cybernetics: Composable Agentic Broker
+The Unified Control Plane for Enterprise AI Agents
+Cybernetics is a production-ready, security-first Model Context Protocol (MCP) meta-broker. It aggregates 20+ specialized MCP adapters into a single, authenticated, auditable control plane, enabling autonomous agents to execute complex, multi-phase workflows across Google Cloud environments.
+
+🚀 The Problem
+Modern enterprise environments are fragmented. Developers and SREs struggle with "Agent sprawl"—needing to configure dozens of disconnected MCP servers, each with its own authentication, security overhead, and maintenance burden.
+
+💡 The Solution
+Cybernetics provides a single, unified entry point. By abstracting the MCP protocol into a composable registry, we allow agents to switch between tools (Dynatrace, GitHub, AWS, etc.) seamlessly, enforced by a Zero Trust security pipeline.
+
+🛠 Core Capabilities
+Unified Tool Namespace: 80+ tools from 20+ adapters (GitLab, Stripe, Kubernetes, Cloudflare, etc.) exposed via one connection.
+
+Agent Composer: Use our UI/Backend to define custom, multi-phase agent templates (Sentinel, DeployAgent, FinanceAgent).
+
+Zero Trust Architecture: Every tool call is gated by middleware, circuit breakers, and input sanitization.
+
+Agentic Orchestration: Native integration with Google ADK for Agent-to-Agent (A2A) communication and ERC-8004 identity standards.
+
+Operational Hardening: Designed for Google Cloud Run, featuring IAM binding, Secret Manager injection, and VPC-SC compliance.
+
+📋 Quick Start (Claude Desktop / Cursor)
+Install the package and add the server to your configuration once.
+
+Bash
+
+
+pip install cybernetics-mcp
+Add to your MCP config:
+
+JSON
+
+
+{
+  "mcpServers": {
+    "cybernetics": {
+      "command": "cybernetics-mcp",
+      "env": {
+        "BROKER_API_KEY": "YOUR_KEY",
+        "POSTGRES_DSN": "postgresql+asyncpg://user:pass@localhost/db"
+      }
+    }
+  }
+}
+Prompt your agent:
+
+"Run the sentinel agent to diagnose the production API latency, create a GitLab issue with the findings, and notify #incidents in Slack."
+
+🏗 Architecture
+We use a hardened FastAPI/Go-based broker that acts as a secure proxy between your AI agents and your infrastructure.
+
+🛡 Security Posture
+Built for high-stakes environments:
+
+Secret Management: No secrets in logs or images; integrated with GCP Secret Manager.
+
+Defense in Depth: Built-in circuit breakers, input regex allow-lists, and Guard middleware to prevent sensitive data leakage.
+
+Compliance: Designed for NIST 800-53 and SOC 2 Type II logging standards.
+
+👩‍💻 The Team
+@plasmaraygun
+
+@GoryGrey
+
+@royhodge812
+
+@sebuh-infsol
+
+Built with ❤️ for the AI Agent Hackathon.
+
+📝 License
+Licensed under Apache 2.0.
+
+Roy, how do you want to handle the deployment documentation? Would you like me to create a separate DEPLOYMENT.md file specifically for the judges, or should we keep the installation steps right here in the main README?
+
 ### The Unified Control Plane for Enterprise AI Agents
 Cybernetics is a production-ready, security-first Model Context Protocol (MCP) meta-broker. It aggregates 20+ specialized MCP adapters into a single, authenticated, auditable control plane, enabling autonomous agents to execute complex, multi-phase workflows across Google Cloud environments.
 
