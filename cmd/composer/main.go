@@ -101,22 +101,22 @@ type ComposeRequest struct {
 }
 
 type ComposeResponse struct {
-	AgentCode string `json:"agent_code"`
+	AgentCode  string `json:"agent_code"`
 	Dockerfile string `json:"dockerfile"`
 }
 
 type DeployRequest struct {
-	ProjectID  string `json:"project_id"`
-	Region     string `json:"region"`
+	ProjectID   string `json:"project_id"`
+	Region      string `json:"region"`
 	ServiceName string `json:"service_name"`
-	AgentCode  string `json:"agent_code"`
+	AgentCode   string `json:"agent_code"`
 }
 
 type ChatRequest struct {
-	Message string            `json:"message"`
-	History []ChatMessage     `json:"history"`
-	Model   string            `json:"model"`
-	Context ChatContext       `json:"context"`
+	Message string        `json:"message"`
+	History []ChatMessage `json:"history"`
+	Model   string        `json:"model"`
+	Context ChatContext   `json:"context"`
 }
 
 type ChatMessage struct {
@@ -125,15 +125,15 @@ type ChatMessage struct {
 }
 
 type ChatContext struct {
-	Template  string            `json:"template"`
-	Adapters  []string          `json:"adapters"`
-	EnvVars   map[string]string `json:"env_vars"`
+	Template string            `json:"template"`
+	Adapters []string          `json:"adapters"`
+	EnvVars  map[string]string `json:"env_vars"`
 }
 
 type ChatResponse struct {
-	Reply       string `json:"reply"`
-	Action      string `json:"action"`
-	ActionData  any    `json:"action_data,omitempty"`
+	Reply      string `json:"reply"`
+	Action     string `json:"action"`
+	ActionData any    `json:"action_data,omitempty"`
 }
 
 // ── Gemini client ───────────────────────────────────────────────────
@@ -195,8 +195,8 @@ func callGemini(ctx context.Context, prompt string) (string, error) {
 func listTemplates(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
-		"templates":  templates,
-		"adapters":   allAdapters,
+		"templates": templates,
+		"adapters":  allAdapters,
 	})
 }
 
@@ -207,7 +207,6 @@ func composeAgent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Build prompt
 	var sb strings.Builder
 	sb.WriteString("You are an expert Python developer. Generate a production-ready async agent class using the Cybernetics MCP framework.\n\n")
 	sb.WriteString(fmt.Sprintf("Base template: %s\n", req.Template))
@@ -233,13 +232,11 @@ func composeAgent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Strip markdown code block markers if present
 	code = strings.TrimPrefix(code, "```python")
 	code = strings.TrimPrefix(code, "```")
 	code = strings.TrimSuffix(code, "```")
 	code = strings.TrimSpace(code)
 
-	// Generate Dockerfile for deployment
 	dockerfile := `FROM python:3.11-slim
 WORKDIR /app
 COPY requirements.txt .
@@ -294,7 +291,6 @@ func chatAgent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Build system context
 	var tmplNames []string
 	for _, t := range templates {
 		tmplNames = append(tmplNames, t.Name)
@@ -315,7 +311,6 @@ If they mention specific adapters, use action "show_adapters" with adapter names
 If they want to deploy, use action "show_deploy".
 `, tmplNames, allAdapters)
 
-	// Build contents
 	contents := []map[string]any{
 		{"role": "user", "parts": []map[string]any{{"text": sysPrompt}}},
 		{"role": "model", "parts": []map[string]any{{"text": "Understood. I'm ready to help you build agents."}}},
@@ -348,7 +343,7 @@ If they want to deploy, use action "show_deploy".
 	if model == "" {
 		model = "gemini-3-flash-preview"
 	}
-	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", model, apiKey)
+	url := fmt.Sprintf("[https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s](https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s)", model, apiKey)
 	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
 	defer cancel()
 
@@ -391,12 +386,10 @@ If they want to deploy, use action "show_deploy".
 
 	text := result.Candidates[0].Content.Parts[0].Text
 
-	// Try to parse JSON action from the response
 	var actionData any
 	action := "none"
 	reply := text
 
-	// Simple extraction: look for JSON block
 	if idx := strings.Index(text, "```json"); idx != -1 {
 		end := strings.Index(text[idx+7:], "```")
 		if end != -1 {
@@ -425,7 +418,7 @@ If they want to deploy, use action "show_deploy".
 	})
 }
 
-// ── CORS middleware ─────────────────────────────────────────────────
+// ── Middleware ────────────────────────────────────────────────────────
 
 func cors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -444,46 +437,28 @@ func cors(next http.Handler) http.Handler {
 	})
 }
 
-func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		next.ServeHTTP(w, r)
-		slog.Info("http_request", "method", r.Method, "path", r.URL.Path, "duration", time.Since(start).String())
-	})
-}
-
-func recoverMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if rec := recover(); rec != nil {
-				slog.Error("panic_recovered", "error", rec)
-				w.WriteHeader(http.StatusInternalServerError)
-				json.NewEncoder(w).Encode(map[string]string{"error": "internal server error"})
-			}
-		}()
-		next.ServeHTTP(w, r)
-	})
-}
-
-// ── Main ────────────────────────────────────────────────────────────
-
 func main() {
 	mux := http.NewServeMux()
+
+	// API Endpoints
 	mux.HandleFunc("/api/templates", listTemplates)
 	mux.HandleFunc("/api/compose", composeAgent)
 	mux.HandleFunc("/api/deploy", deployAgent)
 	mux.HandleFunc("/api/chat", chatAgent)
 
+	// Serve Static Frontend
+	// This serves files from the ./static folder (where Vite build output is copied)
+	fs := http.FileServer(http.Dir("./static"))
+	mux.Handle("/", fs)
+
 	var handler http.Handler = mux
 	handler = cors(handler)
-	handler = loggingMiddleware(handler)
-	handler = recoverMiddleware(handler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3001"
 	}
-	slog.Info("composer starting", "port", port)
+	slog.Info("server starting", "port", port)
 	if err := http.ListenAndServe(":"+port, handler); err != nil {
 		slog.Error("server failed", "error", err)
 		os.Exit(1)
