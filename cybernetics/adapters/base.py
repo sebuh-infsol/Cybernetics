@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional, Callable
 from dataclasses import dataclass, field
 from cybernetics.logging.logger import get_logger
+from cybernetics.sentinels.pipeline import SentinelPipeline, Auditor, Guard, CostEstimator
+from cybernetics.config.settings import settings
 
 logger = get_logger("cybernetics.adapters.base")
 
@@ -37,6 +39,18 @@ class MCPAdapter(ABC):
     def __init__(self):
         self._tools: Dict[str, Callable] = {}
         self._definitions: Dict[str, ToolDefinition] = {}
+        self._pipeline = self._setup_pipeline()
+
+    def _setup_pipeline(self) -> SentinelPipeline:
+        pipeline = SentinelPipeline()
+        enabled = settings.sentinels_enabled
+        if "audit" in enabled:
+            pipeline.add(Auditor())
+        if "guard" in enabled:
+            pipeline.add(Guard())
+        if "cost" in enabled:
+            pipeline.add(CostEstimator())
+        return pipeline
 
     def register_tool(
         self,
@@ -64,9 +78,15 @@ class MCPAdapter(ABC):
                 success=False,
                 error=f"Tool '{tool_name}' not found in adapter '{self.name}'",
             )
+        
+        tool_call = {"adapter": self.name, "tool": tool_name, "arguments": arguments}
+        
         try:
-            result = await handler(**arguments)
-            return ToolResult(success=True, data=result)
+            async def _executor():
+                return await handler(**arguments)
+            
+            result_data = await self._pipeline.execute(tool_call, _executor)
+            return ToolResult(success=True, data=result_data)
         except Exception as exc:
             logger.exception("tool_execution_failed", adapter=self.name, tool=tool_name)
             return ToolResult(success=False, error=str(exc))
