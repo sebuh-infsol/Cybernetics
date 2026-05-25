@@ -18,7 +18,7 @@ export function Header({ page, onNavigate }: HeaderProps) {
             <button
               onClick={() => onNavigate('composer')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors ${
-                page === 'composer' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
+                page === 'composer' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
               }`}
             >
               <Terminal className="w-4 h-4" />
@@ -27,7 +27,7 @@ export function Header({ page, onNavigate }: HeaderProps) {
             <button
               onClick={() => onNavigate('mcp')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors ${
-                page === 'mcp' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
+                page === 'mcp' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
               }`}
             >
               <Server className="w-4 h-4" />

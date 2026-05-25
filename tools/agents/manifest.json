@@ -1,0 +1,14 @@
+{
+  "name": "Agent Tools",
+  "path": "tools/agents",
+  "files": [
+    "deploy-agents.mjs",
+    "deploy-skills.mjs",
+    "deploy-windsurf.mjs",
+    "providers",
+    "update-agent-tools.mjs"
+  ],
+  "ignore": [
+    "manifest.json"
+  ]
+}

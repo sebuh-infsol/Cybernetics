@@ -112,10 +112,10 @@ export function Composer() {
     return [...new Set(keys)]
   }
 
-  async function handleChat(text: string) {
+  async function handleChat(text: string, currentMessages: Message[]) {
     setIsTyping(true)
     try {
-      const history = messages
+      const history = currentMessages
         .filter(m => m.role === 'user' || m.role === 'assistant')
         .map(m => ({ role: m.role, content: m.content }))
 
@@ -126,6 +126,7 @@ export function Composer() {
           message: text,
           history,
           model: selectedModel,
+          gemini_key: geminiKey,
           context: {
             template: selectedTemplate?.name || '',
             adapters: Array.from(selectedAdapters),
@@ -268,7 +269,9 @@ export function Composer() {
     }
     if (text.toLowerCase() === 'compose') {
       addMessage({ role: 'user', content: text })
-      handleCompose()
+      handleCompose().catch(err => {
+        addMessage({ role: 'assistant', content: `Compose failed: ${err.message}` })
+      })
       return
     }
     if (text.toLowerCase().startsWith('deploy')) {
@@ -304,7 +307,7 @@ export function Composer() {
     }
 
     addMessage({ role: 'user', content: text })
-    handleChat(text)
+    handleChat(text, messages)
   }
 
   function selectTemplate(t: Template) {

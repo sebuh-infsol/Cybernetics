@@ -1,0 +1,157 @@
+# Cybernetics — Omni-MCP Broker Configuration
+# Google Cloud Rapid Agent Hackathon
+
+broker:
+  host: "0.0.0.0"
+  port: 8000
+  mcp_version: "2025-03-26"
+
+# Partner MCP Server Configurations
+# Each track gets a dedicated MCP server connection.
+# The broker dynamically loads these at startup.
+partners:
+  gitlab:
+    name: "GitLab"
+    enabled: true
+    mcp_server:
+      transport: sse
+      url: "https://mcp.gitlab.com/mcp"
+      headers:
+        Authorization: "Bearer ${GITLAB_TOKEN}"
+    tools:
+      - "gitlab_get_project"
+      - "gitlab_create_issue"
+      - "gitlab_merge_request"
+      - "gitlab_get_merge_request"
+    sentinels:
+      - auditor
+      - safety
+      - cost
+
+  github:
+    name: "GitHub"
+    enabled: true
+    adapter: "github_adapter"
+    tools:
+      - "github_get_repo"
+      - "github_create_issue"
+      - "github_create_pr"
+      - "github_list_prs"
+    sentinels:
+      - auditor
+      - safety
+      - cost
+
+  mongodb:
+    name: "MongoDB"
+    enabled: false
+    mcp_server:
+      transport: sse
+      url: "https://mcp.mongodb.com/mcp"
+      headers:
+        Authorization: "Bearer ${MONGODB_API_KEY}"
+    tools:
+      - "mongodb_find"
+      - "mongodb_insert"
+      - "mongodb_aggregate"
+    sentinels:
+      - auditor
+      - safety
+
+  elastic:
+    name: "Elastic"
+    enabled: false
+    mcp_server:
+      transport: sse
+      url: "https://mcp.elastic.co/mcp"
+      headers:
+        Authorization: "Bearer ${ELASTIC_API_KEY}"
+    tools:
+      - "elastic_search"
+      - "elastic_index"
+      - "elastic_bulk"
+    sentinels:
+      - auditor
+      - cost
+
+  arize:
+    name: "Arize"
+    enabled: false
+    mcp_server:
+      transport: sse
+      url: "https://mcp.arize.com/mcp"
+      headers:
+        Authorization: "Bearer ${ARIZE_API_KEY}"
+    tools:
+      - "arize_query_metrics"
+      - "arize_list_models"
+      - "arize_get_observability"
+    sentinels:
+      - auditor
+
+  fivetran:
+    name: "Fivetran"
+    enabled: false
+    mcp_server:
+      transport: sse
+      url: "https://mcp.fivetran.com/mcp"
+      headers:
+        Authorization: "Bearer ${FIVETRAN_API_KEY}"
+    tools:
+      - "fivetran_list_destinations"
+      - "fivetran_get_sync_status"
+    sentinels:
+      - auditor
+
+  dynatrace:
+    name: "Dynatrace"
+    enabled: false
+    mcp_server:
+      transport: sse
+      url: "https://mcp.dynatrace.com/mcp"
+      headers:
+        Authorization: "Bearer ${DYNATRACE_API_TOKEN}"
+    tools:
+      - "dynatrace_query_metrics"
+      - "dynatrace_get_dashboards"
+    sentinels:
+      - auditor
+      - cost
+
+# Sentinel Configuration
+sentinels:
+  auditor:
+    enabled: true
+    log_level: "info"
+    log_format: "json"
+    persist: true
+    output_path: "logs/audit.jsonl"
+
+  safety:
+    enabled: true
+    max_tool_calls_per_request: 10
+    blocklist:
+      - "system_command"
+      - "file_write"
+      - "network_request"
+    require_approval_for:
+      - "delete"
+      - "modify"
+      - "execute"
+
+  cost:
+    enabled: true
+    currency: "USD"
+    estimated_costs:
+      gitlab_get_project: 0.001
+      gitlab_create_issue: 0.002
+      gitlab_merge_request: 0.003
+      github_get_repo: 0.001
+      github_create_issue: 0.002
+      github_create_pr: 0.003
+      github_list_prs: 0.001
+      mongodb_find: 0.001
+      mongodb_insert: 0.002
+      elastic_search: 0.001
+    budget_limit: 5.00
+    warn_threshold: 3.00

@@ -1,0 +1,16 @@
+{
+  "agent": {
+    "name": "Omni-Agent",
+    "description": "Composable agent powered by the Omni-MCP Broker",
+    "model": "gemini-3-pro-preview-0409"
+  },
+  "tools": {
+    "type": "mcp",
+    "endpoint": "http://localhost:8000/sse",
+    "description": "Unified MCP endpoint for all partner tools"
+  },
+  "sentinels": {
+    "enabled": true,
+    "pipeline": ["Auditor"]
+  }
+}
