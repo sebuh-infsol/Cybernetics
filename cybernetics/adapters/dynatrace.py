@@ -53,7 +53,9 @@ class DynatraceAdapter(MCPAdapter):
         )
 
     @circuit("dynatrace", failure_threshold=5, recovery_timeout=60)
-    async def _get_problems(self, from_: str = "now-1h", status: str = "OPEN") -> List[Dict[str, Any]]:
+    async def _get_problems(self, **kwargs) -> List[Dict[str, Any]]:
+        from_ = kwargs.get("from", "now-1h")
+        status = kwargs.get("status", "OPEN")
         async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.get(
                 f"{self.base_url}/api/v2/problems",

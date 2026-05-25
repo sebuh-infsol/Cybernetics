@@ -1,8 +1,8 @@
 """Kubernetes adapter for cluster operations via kubectl / in-cluster API."""
 
-import os
 from typing import Dict, Any, List
 from cybernetics.adapters.base import MCPAdapter
+from cybernetics.config.settings import settings
 from cybernetics.logging.logger import get_logger
 
 logger = get_logger("cybernetics.adapters.kubernetes")
@@ -14,8 +14,8 @@ class KubernetesAdapter(MCPAdapter):
 
     def __init__(self):
         super().__init__()
-        self._context = os.getenv("KUBECONFIG_CONTEXT", "")
-        self._namespace = os.getenv("KUBERNETES_NAMESPACE", "default")
+        self._context = settings.kubeconfig_context
+        self._namespace = settings.kubernetes_namespace
         self._setup_tools()
 
     def _setup_tools(self):
@@ -95,7 +95,7 @@ class KubernetesAdapter(MCPAdapter):
     def _k8s_client(self):
         try:
             from kubernetes import client, config
-            if os.getenv("KUBERNETES_SERVICE_HOST"):
+            if settings.kubernetes_service_host:
                 config.load_incluster_config()
             else:
                 config.load_kube_config(context=self._context or None)

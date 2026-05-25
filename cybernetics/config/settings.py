@@ -74,6 +74,25 @@ class Settings(BaseSettings):
     cloudflare_api_token: str = Field("", alias="CLOUDFLARE_API_TOKEN")
     cloudflare_account_id: str = Field("", alias="CLOUDFLARE_ACCOUNT_ID")
 
+    # Datadog
+    datadog_api_key: str = Field("", alias="DATADOG_API_KEY")
+    datadog_app_key: str = Field("", alias="DATADOG_APP_KEY")
+    datadog_site: str = Field("datadoghq.com", alias="DATADOG_SITE")
+
+    # Kubernetes
+    kubeconfig_context: str = Field("", alias="KUBECONFIG_CONTEXT")
+    kubernetes_namespace: str = Field("default", alias="KUBERNETES_NAMESPACE")
+    kubernetes_service_host: str = Field("", alias="KUBERNETES_SERVICE_HOST")
+
+    # Slack
+    slack_bot_token: str = Field("", alias="SLACK_BOT_TOKEN")
+
+    # Notion
+    notion_token: str = Field("", alias="NOTION_TOKEN")
+
+    # Linear
+    linear_api_key: str = Field("", alias="LINEAR_API_KEY")
+
     # Browser DevTools (CDP)
     browser_cdp_host: str = Field("localhost", alias="BROWSER_CDP_HOST")
     browser_cdp_port: int = Field(9222, alias="BROWSER_CDP_PORT")

@@ -26,6 +26,7 @@ dependencies = [
     "python-jose[cryptography]>=3.3.0",
     "python-multipart>=0.0.20",
     "starlette>=0.45.0",
+    "pytest-playwright>=0.8.0",
 ]
 
 [project.scripts]

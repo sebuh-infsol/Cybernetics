@@ -1,9 +1,9 @@
 """Slack adapter for sending messages, channel ops, and bot interactions."""
 
-import os
-from typing import Dict, Any
 import httpx
+from typing import Dict, Any
 from cybernetics.adapters.base import MCPAdapter, ToolResult
+from cybernetics.config.settings import settings
 from cybernetics.logging.logger import get_logger
 
 logger = get_logger("cybernetics.adapters.slack")
@@ -15,7 +15,7 @@ class SlackAdapter(MCPAdapter):
 
     def __init__(self):
         super().__init__()
-        self._token = os.getenv("SLACK_BOT_TOKEN", "")
+        self._token = settings.slack_bot_token
         self._client = httpx.AsyncClient(
             base_url="https://slack.com/api",
             headers={"Authorization": f"Bearer {self._token}"},
