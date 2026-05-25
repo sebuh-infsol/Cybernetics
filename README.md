@@ -1,6 +1,6 @@
 <div align="center">
 
-<!-- Cybernetics Banner: see assets/banner.svg -->
+![Cybernetics Banner](assets/banner.svg)
 
 </div>
 

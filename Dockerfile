@@ -1,14 +1,38 @@
-FROM python:3.11-slim
+# Stage 1: Build Frontend (Node.js)
+FROM node:22-alpine AS frontend-builder
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
 
+# Stage 2: Build Backend (Go)
+FROM golang:1.22-alpine AS backend-builder
 WORKDIR /app
+COPY backend/go.* ./
+RUN go mod download
+COPY backend/ ./
+# Embed frontend assets from stage 1 into the Go binary's directory
+COPY --from=frontend-builder /app/frontend/dist ./static
+RUN CGO_ENABLED=0 GOOS=linux go build -o cybernetics-server
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Stage 3: Final Production Image (Minimal)
+FROM alpine:latest
+WORKDIR /root/
 
-COPY src/ ./src/
-COPY .env .
+# Security: run as non-root
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
+# Copy Go binary and assets
+COPY --from=backend-builder /app/cybernetics-server .
+COPY --from=backend-builder /app/static ./static
+
+# Security: Environment settings
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app
+ENV PORT=8080
 
-CMD ["python", "src/agent.py"]
+EXPOSE 8080
+USER appuser
+
+# Start the Go server (which serves the ./static files)
+CMD ["./cybernetics-server"]
